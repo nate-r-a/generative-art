@@ -1,0 +1,73 @@
+<!-- https://generativeartistry.com/tutorials/joy-division/ -->
+
+<body style="text-align: center; margin-top: 100px; background-color: black;">
+  <canvas width="500" height="500" ></canvas>
+</body>
+
+<script>
+  var canvas = document.querySelector("canvas")
+  var context = canvas.getContext("2d")
+
+  // var size = window.innerWidth;
+  var size = 500
+  context.lineWidth = 3;
+
+  var step = 20
+  var lines = []
+
+  // Initialize the lines
+  for (var i = step; i <= size-step; i += step) {
+    var line = [];
+    for(var j = step; j <= size-step; j += step) {
+      // Add some randomness
+      var distanceToCenter = Math.abs(j - (size/2))
+      var variance = Math.max((size/2) - 75 - distanceToCenter, 0);
+      
+      var random = Math.random() * variance / 2 * -1;
+
+      var point = { x: j, y: i + random }
+      line.push(point)
+    }
+
+    lines.push(line)
+  }
+
+  // Draw them here
+  for(var i = 4; i < lines.length; i++) {
+    // The path starts here
+    context.beginPath();
+    context.moveTo(lines[i][0].x, lines[i][0].y)
+
+    for (var j = 0; j < lines[i].length-2; j=j+1) {
+      // We're finding the points for an "anchor" point here    
+      // We subtracted 2 above because [j + 1] would be out of bounds otherwise     
+      var xc = (lines[i][j].x + lines[i][j + 1].x) / 2;
+      var yc = (lines[i][j].y + lines[i][j + 1].y) / 2;
+      // var xc = lines[i][j].x 
+      // var yc = lines[i][j].y 
+      context.quadraticCurveTo(lines[i][j].x, lines[i][j].y, xc, yc);
+    }
+
+    // Because we've done lines[i].length-2 above, this fills in the last bits that got cut off earlier
+    context.quadraticCurveTo(lines[i][j].x, lines[i][j].y, lines[i][j + 1].x, lines[i][j + 1].y);
+
+    // I'll be honest, I still don't know what this does for us here
+    context.save();
+
+    // globalCompositeOperation specifies how overlapping objects should interact
+    // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation
+    context.globalCompositeOperation = 'destination-out';
+
+    // When you're "filling" a line, this method draws a line
+    // from the end point to the beginning point, then
+    // fills the polygon that creates.
+    // fill() fills the shape with black, by default
+    context.fill();
+
+    // See line 48
+    context.restore();
+
+    context.strokeStyle = "white"
+    context.stroke();
+  }
+</script>
